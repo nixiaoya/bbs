@@ -1,0 +1,86 @@
+{% extends 'bbs/index.html' %}
+{% block userinfo %}
+	<ul class="nav navbar-nav navbar-left">
+		<li><a href="/bbs/Uinfo/{{ Gusername }}/">用户信息</a></li>
+		<li class="active"><a href="/bbs/Uinfo/{{ Gusername }}/MyTips/">用户帖子</a></li>
+		<li><a href="/bbs/Uinfo/{{ Gusername }}/MyComments/">用户评论</a></li>
+	</ul>
+{% endblock %}
+{% block page-content %}
+	{% if  not user.is_authenticated %}
+		<p>请先<a href="/bbs/login/">登陆</a>再查看用户信息！没有账号，请先<a href="/bbs/register">注册</a></p>
+	{% else %}
+		<div class="col-md-12">
+		<table class="table">
+			<thead>
+				<tr>
+					<th>标题</th>
+					<th>评论数</th>
+					<th>类型</th>
+					<th>创建时间</th>
+					<th>最后更新时间</th>
+					{% ifequal user.username Gusername %}
+						<th>帖子管理</th>
+					{% endifequal %}
+				</tr>
+			</thead>
+			<tbody>
+			{% ifequal user.username Gusername %}
+				{% for bbs in BBS_obj_list %}	
+				<tr>
+					<td> <a href="/bbs/{{ bbs.category.name }}/{{ bbs.id }}/">{{ bbs.title }}</a></td>
+					<td>{{ bbs.comments }}</td>
+					<td>{{ bbs.category.chinese_name }}</td>
+					<td>{{ bbs.created_at|date }}</td>
+					<td>{{ bbs.updated_at|date }}</td>
+					<td>
+						<a class="btn btn-warning btn-sm" href="/bbs/Uinfo/{{ user.username }}/MyTips/{{ bbs.id }}/"><i class="glyphicon glyphicon-pencil icon-white"></i>  编辑</a>&nbsp;
+						<button type="button" class="btn btn-danger btn-sm" value="{{ bbs.id }}"><i class="glyphicon glyphicon-trash icon-white"></i>  删除</button>
+					</td>
+				</tr>
+				{% endfor %} 
+			{% else %}
+				{% for bbs in BBS_obj_list %}	
+				<tr>
+					<td> <a href="/bbs/{{ bbs.category.name }}/{{ bbs.id }}/">{{ bbs.title }}</a></td>
+					<td>{{ bbs.comments }}</td>
+					<td>{{ bbs.category.name }}</td>
+					<td>{{ bbs.created_at|date }}</td>
+					<td>{{ bbs.updated_at|date }}</td>
+				</tr>
+				{% endfor %}
+			{% endifequal %}			
+			</tbody>
+		</table>
+		</div>
+	{% endif %}
+{% if user.is_authenticated %}
+{% ifequal user.username Gusername %}
+ <script type="text/javascript">
+    $(function (){
+        $(".btn-danger").bind("click", function () {
+			$.ajax({
+                type:"post",
+				dataType:"json",
+				url:"/bbs/tips_modify/",
+                data:{ 
+					"Gusername":"{{ Gusername }}",
+                    "modify_type":"bbs_del", 
+                    "bbs_id":escape(this.value),      
+                    }, 
+				success: function (data) {    
+					if(data.resulte=="success"){
+					window.location.reload();
+					}
+					else{
+						alert("帖子删除失败！");
+					}
+                }
+            });
+        });
+		
+    });
+ </script>
+ {% endifequal %}
+ {% endif %}
+{% endblock %}

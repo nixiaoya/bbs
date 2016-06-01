@@ -1,0 +1,125 @@
+{% extends 'bbs/index.html' %}
+{% block userinfo %}
+	<ul class="nav navbar-nav navbar-left">
+		<li><a href="/bbs/Uinfo/{{ Gusername }}/">用户信息</a></li>
+		<li class="active"><a href="/bbs/Uinfo/{{ Gusername }}/MyTips/">用户帖子</a></li>
+		<li><a href="/bbs/Uinfo/{{ Gusername }}/MyComments/">用户评论</a></li>
+	</ul>
+{% endblock %}
+{% block page-content %}
+	{% if  not user.is_authenticated %}
+		<p>请<a href="/bbs/login/">登录</a> ，在发帖,没有账号请先<a href="/bbs/register/">注册 </a></p>
+	{% else %}
+	<div class="col-md-12">
+		<form class="form-horizontal" role="form">
+		{% csrf_token %}
+			<div class="form-group">
+				<label for="inputtitle" class="col-sm-1 control-label">标题</label>
+				<div class="col-sm-11" >
+					<input class="from-control" name="username" style="width:50%;" id="id_title" value="{{ BBS_obj.title }}"/>
+					<span id="sh_msg1" style="margin-left:5px;font-size:20px;"></span>
+				</div>
+					<div style='height:10px;clear:both;display:block'></div>
+				<label for="input-summary" class="col-sm-1 control-label">类型</label>
+				<div class="col-sm-11" >
+					<select id="id_cate" class="form-control" style="width:20%;">
+					{% for cat in cat_list %}
+						{% ifnotequal cat.name "Home" %}
+							{% ifequal cat.name BBS_obj.category.name %}
+								<option value="{{ cat.name }}" selected="selected">{{ cat.chinese_name }}</option>
+							{% else %}
+								<option value="{{ cat.name }}">{{ cat.chinese_name }}</option>
+							{% endifequal %}
+						{% endifnotequal %}
+					{% endfor %}
+					</select>
+				</div>
+					<div style='height:10px;clear:both;display:block'></div>
+				<label for="input-summary" class="col-sm-1 control-label">概要</label>
+				<div class="col-sm-11" >
+					<input class="from-control" name="username" style="width:50%;" id="id_summary" value="{{ BBS_obj.summary }}"/>
+					<span id="sh_msg2" style="margin-left:5px;font-size:20px;"></span>
+				</div>
+					<div style='height:10px;clear:both;display:block'></div>
+				<label for="input content" class="col-sm-1 control-label">正文</label>
+				<div class="col-sm-11" >
+					<textarea id="id_content" name="signature" class="form-control"   style="height:300px;" >{{ BBS_obj.content }}</textarea>
+				</div>
+				<div class="col-sm-offset-1 col-sm-11" style="height:30px;">
+					<span id="sh_msg3" style="margin-left:5px;font-size:20px;"></span>
+				</div>
+				<div class="col-sm-12">
+					<button id="sub_tips" class="btn btn-success btn-lg pull-right" type="button"> 确认修改</button>
+				</div>
+			</div>
+		</form> 
+	</div>
+	
+	<script type="text/javascript">
+	$(function(){
+		$("#sub_tips").bind("click", function () {
+			var title=$("#id_title");
+			var summary=$("#id_summary");
+			var content=tinyMCE.get('id_content').getContent();
+			var cate=$("#id_cate");
+			var msg1=$("#sh_msg1");
+			var msg2=$("#sh_msg2");
+			var msg3=$("#sh_msg3");
+			if(title.val()==""){
+				html="Title can not be empty !"
+				msg1.text(html);
+				msg1.css('color','red');
+			}
+			else if(summary.val()==""){
+				html="Summary can not be empty !"
+				msg2.text(html);
+				msg2.css('color','red');
+			}
+			else if(content.length==0){
+				html="Content can not be empty !"
+				msg3.text(html);
+				msg3.css('color','red');
+			}
+			else if(title.val().length>50){
+				html="More then 30 letters in this title!"
+				msg1.text(html);
+				msg1.css('color','red');
+				}
+			else if(summary.val().length>100){
+				html="More then 50 letters in this summary!"
+				msg2.text(html);
+				msg2.css('color','red');				
+				}
+			else{
+            $.ajax({
+                type:"post",
+				dataType:"json",
+				url:"/bbs/post_tip/",
+                data:{ 
+					"bbs_id":"{{ BBS_obj.id }}",
+                    "username":"{{ user.username }}", 
+					"title":title.val(),
+					"category":escape(cate.val()),
+					"summary":summary.val(),
+					"content":content,
+                    }, 
+				success: function (data) {    
+						if(data.result=="failed"){
+							msg1.empty();
+							msg2.empty();
+							msg3.empty();
+							var html="failed to create tip";
+							msg3.text(html);
+							msg3.css('color','red');
+						}
+						else if(data.result=="success"){
+							window.location.href="/bbs/"+cate.val()+"/"+{{ BBS_obj.id }};
+						}
+					}
+				});
+			}
+		});
+	});
+	</script>
+	{% endif %}
+{% endblock %}

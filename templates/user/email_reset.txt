@@ -1,0 +1,19 @@
+Hello, {{ username }}.
+
+
+You're receiving this email because you requested a password reset for your user account.
+
+Please click the link below to reset your password.
+
+If clicking doesn't work, please copy and paste the URL in a new browser window instead.
+
+http://{{ host }}/bbs/user/reset/?token={{ token }}
+
+Your username, in case you've forgotten: {{ username }}.
+
+
+Sincerely,
+
+China National GeneBank
+
+Note: Please do not reply to this message.

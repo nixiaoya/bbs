@@ -1,0 +1,17 @@
+Hello, {{ username }}.
+
+
+You have created an new account successfully.
+
+Please click the link below to activate your account.
+
+If clicking doesn't work, please copy and paste the URL in a new browser window instead.
+
+http://{{ host }}/bbs/user/active/?token={{ token }}
+
+
+Sincerely,
+
+China Natonal GeneBank
+
+Note: Please do not reply to this message.

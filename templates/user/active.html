@@ -1,0 +1,8 @@
+{% extends 'main/base.html' %}
+{% block page-content %}
+	{% if get_token %}
+    <h3>{{ info }}，请<a href="/bbs/user/login/">登录</a></h3>
+	{% else %}
+	<h3>邮箱验证失败，请重试或联系管理员</h3>
+	{% endif %}
+{% endblock %}

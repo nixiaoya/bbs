@@ -1,0 +1,59 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block page-content %}
+    <div class="col-md-9">
+        {% for bbs in bbs_list %}
+            <a href="/bbs/{{ bbs.category.name }}/{{ bbs.id }}/"><h3>{{ bbs.title }}</h3></a>
+            <br>
+            {{ bbs.summary }}
+            <div>
+                <p style="margin-top:10px;font-size:15px">
+                <span class="glyphicon glyphicon-tag"></span>
+                <a href="/bbs/{{ bbs.category.name }}/">{{ bbs.category.chinese_name }}</a>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <span class="glyphicon glyphicon-edit"></span>
+                <a href="/bbs/Uinfo/{{ bbs.author }}/">{{ bbs.author }}</a>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <span class="glyphicon glyphicon-comment"></span>
+                <span>{{ bbs.comments }}</span>
+                <span class="pull-right">{{ bbs.updated_at|date:"Y/m/d H:i" }}</span>
+                </p>
+            </div>
+            <hr>
+        {% endfor %}
+    </div>
+    <div class="col-md-3" style="background-color:white;">
+        <h3>帖子总数: {{ Total_tips }} </h3>
+        <a class="btn btn-success btn-lg" href="/bbs/article_add/">新帖</a>
+    </div>
+{% endblock %}
+    
+{% block js %}
+    <script type="text/javascript" src={% static "bbs/js/tinymce/tinymce.min.js" %}></script>
+    <script type="text/javascript">
+    tinymce.init({
+        selector: "textarea#id_content",
+        theme: "modern",
+        //width: 300,
+        //height: 300,
+        language:'zh_CN',
+        plugins: [
+             "advlist autolink link image lists charmap print preview hr anchor pagebreak spellchecker",
+             "searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking",
+             "save table contextmenu directionality emoticons template paste textcolor"
+       ],
+       //content_css: "/Templates/bbs/js/tinymce/css/content.css",
+       toolbar: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | l      ink image | print preview media fullpage | forecolor backcolor emoticons", 
+       style_formats: [
+            {title: 'Bold text', inline: 'b'},
+            {title: 'Red text', inline: 'span', styles: {color: '#ff0000'}},
+            {title: 'Red header', block: 'h1', styles: {color: '#ff0000'}},
+            {title: 'Example 1', inline: 'span', classes: 'example1'},
+            {title: 'Example 2', inline: 'span', classes: 'example2'},
+            {title: 'Table styles'},
+            {title: 'Table row 1', selector: 'tr', classes: 'tablerow1'}
+        ]
+     }); 
+    </script>
+{% endblock %}

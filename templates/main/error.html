@@ -1,0 +1,33 @@
+{% extends 'bbs/index.html' %}
+{% block page-content %}
+<h2 style="color:red">错误请求</h2>
+<p><span id="showTime"style="color:green">3</span> 秒后自动跳转到 <a href='/bbs/'>首页</a></p>
+
+
+
+
+<script type="text/javascript">
+	$(function(){
+	var timer;
+	var count=4;
+	function auto_jump1(){
+		timer = window.setInterval(auto_jump2,1000)
+	}
+	function auto_jump2(){
+		count--;
+		$("#showTime").text(count);
+		if(count == 0){
+			window.clearInterval(timer);
+			window.location.href='/bbs/';
+		}
+	}
+	auto_jump1();
+	
+	
+	
+	
+	
+	
+	});
+</script>
+{% endblock %}

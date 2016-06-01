@@ -1,0 +1,8 @@
+lib/
+bin/
+share/
+include/
+uwsgi/
+/pip-selfcheck.json
+*.pyc
+settings.py

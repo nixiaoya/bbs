@@ -1,0 +1,92 @@
+{% extends "bbs/index.html" %}
+{% block page-content %}
+	<h2>{{ bbs_obj.title }}</h2>
+	<div style="font-size:25px"><span>作者:</span><a href="/bbs/Uinfo/{{ bbs_obj.author }}"/><em>{{ bbs_obj.author }} </em></a></div>
+	<div style="font-size:20px"> {{ bbs_obj.content|safe }} </div>
+	<hr>
+	<span class="glyphicon glyphicon-comment"></span>
+	<span id="com_count">{{ bbs_obj.comments }}</span>
+	<span class="pull-right">{{ bbs_obj.updated_at }}</span>
+	<hr>
+	{% if user.is_authenticated %}
+		<form class='form-horizontal' role='form' method="post">
+			<textarea class="form-control" id="comment_content" rows="3"></textarea>
+			<div style="height:20px;margin:5px">
+				<button id="submit_bt" class='btn btn-md btn-primary pull-right ' type='button'>提交评论</button>
+			</div>
+		</form>
+	{% else %}
+		<p align="center"><em> 请先<a href="/bbs/login/">登录</a> 再发表评论！</em></p>
+	{% endif %}
+	<hr id="target_hr">
+
+	{% if comm_obj_list %}
+	{% for comment in comm_obj_list reversed %}
+	<div>
+		<span>{{ comment.Ctime|date:"Y/m/d H:i" }}</span>
+		<span><a href="/bbs/Uinfo/{{ comment.author }}/">{{ comment.author }}</a></span>
+	</div>
+		<p>{{ comment.content }}</p>
+	<hr> 
+	{% endfor %}
+	{% endif %}
+	<nav>
+		<ul class="pagination">
+			{% ifequal Comm_cur_page 1 %}
+				<li class="disabled"><span style="background-color:#ECECEC;">&laquo;</span></li>
+			{% else %}
+				<li><a href="/bbs/{{ Cat_obj.name }}/{{ bbs_obj.id }}/?Cp={{ Pre_cpage }}">&laquo;</a></li>
+			{% endifequal %}
+			{% for page in pagelist %}
+				{% ifequal page Comm_cur_page %}
+				<li class="active"><a href="/bbs/{{ Cat_obj.name }}/{{ bbs_obj.id }}/?Cp={{ page }}">{{ page }}</a></li>
+				{% else %}
+				<li><a href="/bbs/{{ Cat_obj.name }}/{{ bbs_obj.id }}/?Cp={{ page }}">{{ page }}</a></li>
+				{% endifequal %}
+			{% endfor %}
+			{% ifequal Comm_cur_page allpage %}
+				<li class="disabled" ><span style="background-color:#ECECEC;">&raquo;</span></li>
+			{% else %}
+				<li><a href="/bbs/{{ Cat_obj.name }}/{{ bbs_obj.id }}/?Cp={{ Next_cpage }}">&raquo;</a></li>
+			{% endifequal %}						
+		</ul>
+	</nav>
+{% if user.is_authenticated %}
+<script type="text/javascript">
+ $(function (){
+        $("#submit_bt").bind("click", function () {
+			var comm_content=$("#comment_content");
+			var target=$("#target_hr");
+			var com_count=$("#com_count");
+			if(comm_content.val() == ""){
+				alert("提交的评论不能为空！")
+			}
+			else{
+            $.ajax({
+                type:"post",
+				dataType:"json",
+				url:"/bbs/post_comm/",
+                data:{ 
+                    "Cat_name":"{{ Cat_obj.name }}", 
+                    "bbs_id":"{{ bbs_obj.id }}", 
+					"comment_content":comm_content.val(),
+                    }, 
+				success: function (data) {    
+					if(data != ""){
+						html="<div>";
+						html+="<span>" + data.Com_ctime + "</span>&nbsp;";
+						html+="<span><a href='/bbs/Uinfo/" + data.Com_author + "/'>" + data.Com_author + "</a></span>";
+						html+="</div>";
+						html+="<p>" + data.Com_content + "</p>";
+						html+="<hr>"
+						target.after(html);
+						com_count.text(data.Com_counts);
+						}
+					}
+				});
+			}
+        });
+    });
+ </script>
+ {% endif %}
+{% endblock %}

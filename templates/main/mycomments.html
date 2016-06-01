@@ -1,0 +1,74 @@
+{% extends 'bbs/index.html' %}
+{% block userinfo %}
+	<ul class="nav navbar-nav navbar-left">
+		<li><a href="/bbs/Uinfo/{{ Gusername }}/">用户信息</a></li>
+		<li><a href="/bbs/Uinfo/{{ Gusername }}/MyTips/">用户帖子</a></li>
+		<li class="active"><a href="/bbs/Uinfo/{{ Gusername }}/MyComments/">用户评论</a></li>
+	</ul>
+{% endblock %}
+{% block page-content %}
+	{% if  not user.is_authenticated %}
+		<p>请先<a href="/bbs/login/">登录</a>再查看用户信息 ! ,没有账号，请先<a href="/bbs/register">注册</a></p>
+	{% else %}
+		<div class="col-md-12">
+		<table class="table">
+			<thead>
+				<tr>
+					<th>评论内容</th>
+					<th>帖子标题</th>
+					<th>评论生成时间</th>
+					{% ifequal user.username Gusername %}
+						<th>评论管理</th>
+					{% endifequal %}
+				</tr>
+			</thead>
+			<tbody>
+			{% ifequal user.username Gusername %}
+				{% for comment in Comm_obj_list %}	
+				<tr>
+					<td>{{ comment.content|truncatewords:"10" }}</td>
+					<td><a href='/bbs/{{ comment.bbs.category.name }}/{{ comment.bbs.id }}/'>{{ comment.bbs.title|truncatewords:"20" }}</a></td>
+					<td>{{ comment.Ctime|date:"Y/m/d H:i" }}</td>
+					<td>
+						<button type="button" class="btn btn-danger btn-sm" value="{{ comment.id }}" value="{{ comment.id }}"><i class="glyphicon glyphicon-trash icon-white"></i>  删除</button>
+					</td>
+				</tr>
+				{% endfor %} 
+			{% else %}
+				{% for comment in Comm_obj_list %}	
+				<tr>
+					<td>{{ comment.content|truncatewords:"10" }}</td>
+					<td><a href='/bbs/{{ comment.bbs.category.name }}/{{ comment.bbs.id }}/'>{{ comment.bbs.title|truncatewords:"20" }}</a></td>
+					<td>{{ comment.Ctime|date:"Y/m/d H:i" }}</td>
+				</tr>
+				{% endfor %}
+			{% endifequal %}			
+			</tbody>
+		</table>
+		</div>
+	{% endif %}
+{% if user.is_authenticated %}
+{% ifequal user.username Gusername %}
+ <script type="text/javascript">
+    $(function (){
+        $(".btn-danger").bind("click", function () {
+			$.ajax({
+                type:"post",
+				dataType:"json",
+				url:"/bbs/comments_modify/",
+                data:{ 
+					"Gusername":"{{ Gusername }}",
+                    "Comm_id":escape(this.value),      
+                    }, 
+				success: function (data) {    
+					if(data != ""){
+					window.location.reload();
+					}
+                }
+            });
+        });
+    });
+ </script>
+ {% endifequal %}
+ {% endif %}
+ {% endblock %}

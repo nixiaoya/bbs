@@ -1,0 +1,183 @@
+{% extends 'main/base.html' %}
+{% load static %}
+
+{% block page-content %}
+	<div id="login_container"class='container' style="width:400px">
+      <form class='form-horizontal' role='form' method="post">
+		<div class="col-sm-offset-3 col-sm-9">
+			<h2 align="center"><strong>用户登录</strong></h2>
+		</div>
+		<label for="InputUsername" class="col-sm-3 control-label">用户名:</label>
+		<div class="col-sm-9">
+			<input type="text" class="form-control" id="username" name="username" placeholder="">
+		</div>
+		<div style='height:10px;clear:both;display:block'></div>	
+		<label for="InputPassword" class="col-sm-3 control-label">密码:</label>
+		<div class="col-sm-9">
+			<input type='password' name="password" id="password" class='form-control' placeholder=''>
+		</div>
+		    <div style='height:10px;clear:both;display:block'></div>
+		<label for="Getvalidcode" class="col-sm-3 control-label">验证码:</label>
+		<div class="col-sm-9">
+			<input type='text' name="validcode" id="validcode" class='form-control' placeholder=''>
+		</div>
+		    <div style='height:10px;clear:both;display:block'></div>
+		<div class="col-sm-offset-3 col-sm-9">
+			<img id="valid_img" class="img-rounded" onclick="this.setAttribute('src','/bbs/user/get_chaptcha/?nocache='+Math.random());" src="/bbs/user/get_chaptcha/"/> 
+		</div>		
+		<div id="show_msg" style='height:30px;clear:both;display:block;' class="col-sm-offset-3 col-sm-9"></div>	
+		<div class="col-sm-offset-3 col-sm-9">
+			<button id="submit_bt" class='btn btn-lg btn-primary btn-block' type='button'>登录</button>
+		</div>
+      </form>
+    </div>
+{% endblock %}
+
+{% block js %}
+ <script type="text/javascript">
+    $(function (){
+		
+		var timer1;
+		function refreshImg1(){
+			timer1 = window.setInterval(refreshImg2,60000);  
+		}
+		function refreshImg2(){		
+			$("#valid_img").attr('src','/bbs/user/get_chaptcha/?nocache='+Math.random());	
+		}
+		refreshImg1();
+
+		var timer2;
+		var count=4;
+		function auto_jump1(){
+			timer2 = window.setInterval(auto_jump2,1000)
+		}
+		function auto_jump2(){
+			count--;
+			$("#shw").text(count);
+			if(count == 0){
+				window.clearInterval(timer2);
+				window.location.href='/bbs/';
+			}
+		}
+		
+		function CheckValidCode(str){
+		var re=/[^a-zA-Z0-9]/g;
+		var match=false;
+		if(re.test(str)){
+			return match;
+			}
+		else if(str.replace(/[0-9]/g,'x').length!=4){
+			return match;
+			}
+		else{
+			$.ajax({
+				type:"post",
+				dataType:"json",
+				url:"/bbs/user/check_chapcha/",
+				async:false,
+				data:{ 
+					"chapcha":str,     
+					}, 
+				success: function (data) { 
+						match = data.match;
+					}				
+				});
+			return match;
+			}
+		}
+	
+	$(document).keyup(function(event){
+		if(event.keyCode == 13){
+			$("#submit_bt").trigger("click");
+		}
+	});
+	
+	$("#submit_bt").bind("click", function () {
+			var msg=$("#show_msg");
+			var username=$("#username");
+			var password=$("#password");
+			var chVcode=$("#validcode");
+			var chVcode=$("#validcode");
+			var get_check=CheckValidCode(chVcode.val());
+			var re=/[^\w\u4e00-\u9fa5]/g;
+			if(username.val()==""){
+				html="<span style='font-size:15px;color:red'>用户名不能为空！</span>"
+				msg.html(html);
+			}
+			else if(password.val()==""){
+				html="<span style='font-size:15px;color:red'>密码不能为空！</span>"
+				msg.html(html);
+			}
+			else if(re.test(username.val())){
+				html="<span style='font-size:15px;color:red'>非法的用户名!</span>"
+				msg.html(html);
+			}
+			else if(!get_check){
+					html="<span style='font-size:15px;color:red'>验证码不匹配！</span>";
+					msg.html(html);
+				}
+			else{
+            $.ajax({
+                type:"post",
+				dataType:"json",
+				url:"/bbs/user/post_login/",
+				async:false,
+                data:{ 
+				//escape()处理英文无影响，处理中文，发送到后台会无法识别
+                    "username":$("#username").val(), 
+                    "password":escape($("#password").val()), 
+					"validcode":escape($("#validcode").val()),
+                    }, 
+				success: function (data) {    
+						if(data.status=="0"){
+							msg.empty();
+							var html="<span style='font-size:15px;color:red'>用户名或密码错误！请重新输入</span>";
+								$("#show_msg").html(html);
+								$("#valid_img").attr('src','/bbs/user/get_chaptcha/?nocache='+Math.random());		
+						}
+						else if(data.status=="2"){
+							msg.empty();
+							var html="<h3 align='center'>请验证邮箱后登录</h3>";
+								$("#login_container").html(html);
+						}
+						else if(data.status=="1"){
+							var html="<h3 align='center'>登录成功&nbsp;将在<span id='shw'>4</span>秒内跳转<a href='/bbs/'>首页</a></h3>";
+							$("#login_container").html(html);
+								auto_jump1();
+						}
+						else{
+							msg.empty();
+							var html="<h3 align='center'>登录失败，刷新页面后重试！</h3>";
+								$("#show_msg").html(html);
+								$("#valid_img").attr('src','/bbs/user/get_chaptcha/?nocache='+Math.random());		
+						}
+					}
+				});
+			}
+    });
+	
+	$("#validcode").blur(function(){
+		var chVcode=$("#validcode");
+		var msg=$("#show_msg");
+		match=CheckValidCode(chVcode.val());
+		if(!match){
+			msg.empty();
+			var html="<span style='font-size:15px;color:red'>验证码不匹配</span>";
+				$("#show_msg").html(html);
+		}
+	});
+	$("#validcode").focus(function(){
+		var msg=$("#show_msg");
+			msg.empty();
+	});
+	$("#username").focus(function(){
+		var msg=$("#show_msg");
+			msg.empty();
+	});
+	$("#password").focus(function(){
+		var msg=$("#show_msg");
+			msg.empty();
+	});
+});
+ </script>
+{% endblock %}
