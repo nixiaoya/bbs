@@ -1,0 +1,2 @@
+# bbs
+for test django
