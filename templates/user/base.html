@@ -1,0 +1,57 @@
+{% load static %}
+
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+    <title>Chouti</title>
+    <link type="text/css" rel="stylesheet" href={% static "pub/css/bootstrap.min.css" %}>
+    <style>
+    html {overflow-y: scroll;} 
+    .shadow{
+        padding:15px 30px;border:#909090 1px solid;background:#fff;color:#333;
+        filter:progid:DXImageTransform.Microsoft.Shadow(color=#909090,direction=120,strength=4);/*ie*/
+        -moz-box-shadow: 2px 2px 10px #909090;/*firefox*/
+        -webkit-box-shadow: 2px 2px 10px #909090;/*safira & chrome*/
+        box-shadow:2px 2px 10px #909090;/*opera ie9*/
+    </style>
+    {% block css %}
+    {% endblock %}
+</head>
+<body>
+    <div class="container">
+        <!-- nav header -->
+        <nav class="navbar navbar-default navbar-inverse" role="navigation">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="/bbs">Chouti</a>
+            </div>
+            {% block navbar %}
+            <ul class="nav navbar-nav navbar-left">
+                {% for cat in cat_list  %}
+                <li><a href=/bbs/{{ cat.name }}/>{{ cat.chinese_name }}</a></li>
+                {% endfor %}
+            </ul>
+            {% endblock %}
+            <ul class="nav navbar-nav navbar-right" style="margin-right:20px">
+            {% if user.is_login %}
+                <li><p class="navbar-text">欢迎</p></li>
+                <li><a href="/bbs/Uinfo/{{ user.username }}/">{{user.username}}</a></li>
+                <li><a href="/bbs/user/logout/">登出</a></li>
+            {% else %}
+                <li><a href="/bbs/user/login/">登陆</a></li>
+                <li><a href="/bbs/user/register/">注册</a></li>
+            {% endif %}
+            </ul>
+        </nav>
+        <!-- body -->
+        <div class="shadow col-md-12">
+            {% block page-content %}
+            {% endblock %}
+        </div>
+    </div>
+    <script type="text/javascript" src={% static "pub/js/jquery.min.js" %}></script>
+    <script type="text/javascript" src={% static "pub/js/bootstrap.min.js" %}></script>
+    <script type="text/javascript" src={% static "bbs/js/csrf_token.js" %}></script>
+    {% block js %}
+    {% endblock %}
+</body>
+</html>

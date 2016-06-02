@@ -1,10 +1,7 @@
-{% extends 'main/base.html' %}
+{% extends 'user/base.html' %}
 {% load static %}
 
 {% block page-content %}
-{% if  not user.is_login %}
-	<p>请先<a href="/bbs/login/">登陆</a>发布帖子！没有账号，请先<a href="/bbs/register">注册</a></p>
-{% else %}
 	<div class="col-md-12">
 		<form class="form-horizontal" role="form">
 		{% csrf_token %}
@@ -45,7 +42,6 @@
 			</div>
 		</form> 
 	</div>
-{% endif %}
 {% endblock %}
 
 {% block js %}
